@@ -1,0 +1,11 @@
+application/MDK-ARM/application/
+application/MDK-ARM/JLinkLog.txt
+application/MDK-ARM/application.bin
+application/MDK-ARM/application.uvguix.*
+
+bootloader/MDK-ARM/bootloader/
+bootloader/MDK-ARM/JLinkLog.txt
+bootloader/MDK-ARM/bootloader.bin
+bootloader/MDK-ARM/bootloader.uvguix.*
+
+
