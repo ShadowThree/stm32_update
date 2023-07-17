@@ -27,7 +27,7 @@
 #define BOOTLOADER_FLAG_OFFSET 			0x100
 
 /**
- *  对这个值还有点疑惑，这个值的意义就是指定栈顶位置。
+ *  对这个值还有点疑惑，这个值的意义就是指定栈顶位置（C语言中，栈是向下增长的）。
  *  理论上针对同一个编译器(MDK)来说，每个工程的栈空间分配都是在差不多的位置；
  *  实际上，我在使用stm32h743iit6时，栈顶就是0x20000400，即栈空间在片内SRAM的开头(栈空间为0x400 Bytes)
  *  而我在使用stm32g473rct6时，栈顶却在0x20020000，即片内SRAM的最末尾(此MCU的SRAM为0x20000=128KB)；
@@ -55,5 +55,18 @@ SCB->VTOR = APP_ADDRESS;
 2. 如果`bootloader`的起始地址为默认的`0x08000000`的话，在从`application`跳转到`bootloader`前，是不需要调用`__set_MSP();`设置`MSP`指针的；
 3. 而当`application`的起始地址不是一个默认起始地址时，在由`bootloader`跳转到`application`前就必须要调用`__set_MSP();`设置`MSP`指针了。
 
+## 总结
+1. [openBootloader](https://github.com/STMicroelectronics/stm32-mw-openbl)是写在STM32的ROM里面的，用户不能擦除修改；
+2. `ROM`里面的`openBootloader`不仅可以通过`usart`进行升级，也可以通过`SPI`，`I2C`，`FDCAN`，`USB`等接口进行升级，但是每个MCU支持的接口可能不尽相同；
+3. `ROM`里面的`openBootloader`不仅可以通过在上电时修改`BOOT0/BOOT1`引脚电平进入，也可以从`user_app`跳转进入（参考: AN2606.Rev59 31/431），
+<img width="880" alt="5fccb478a87b4f84ec3798b645740d8" src="https://github.com/ShadowThree/stm32_update/assets/41199004/23ff073d-7d6c-45ee-b0a4-a4443f5b824f">
 
+4. stm32g473rct6在跳转到ROM中的bootloader时，需要通过以下语句将ROM重映射到0x0地址：
+```c
+__HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();      // remap system memory to 0x00000000
+```
+但stm32h743iit6却不需要（且此MCU的HAL库中不存在这个接口）。
+我猜这个区别和这两个`MCU`的`Reference Manuel`中`Boot configuration`部分的描述有关(但目前也说不太清楚)：
 
+<img width="516" alt="3b24cca0cd8987756cd0448ccf638f8" src="https://github.com/ShadowThree/stm32_update/assets/41199004/760d844d-c28c-4ad4-80ee-a01d290108bb">
+<img width="474" alt="a591d4c6664f62aeabe732eef54fc48" src="https://github.com/ShadowThree/stm32_update/assets/41199004/78bd074f-d8a1-4743-9344-0987fcc378b4">
