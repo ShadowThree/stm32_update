@@ -1,0 +1,3 @@
+*.uvguix.*
+*.txt
+stm32g473rct6/update_by_ROM/ROM_USART/application/MDK-ARM/application/*
