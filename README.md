@@ -5,6 +5,7 @@
 3. [STM32 microcontroller system memory boot mode](https://www.st.com/resource/en/application_note/an2606-stm32-microcontroller-system-memory-boot-mode-stmicroelectronics.pdf)
 4. 请一定要在相应MCU的官方FW固件包中找一找，是否有相似的IAP或者bootloader例程，比如`STM32Cube_FW_H7_V1.11.0\Projects\STM32H743I-EVAL\Applications\IAP`
 5. 目标`MCU`的`Reference manual`，比如[RM0433: stm32h743xx Reference manual](https://www.st.com/resource/en/reference_manual/dm00314099-stm32h742-stm32h743-753-and-stm32h750-value-line-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
+6. [On-the-fly firmware update for dual bank STM32 microcontrollers](https://www.st.com/resource/en/application_note/an4767-onthefly-firmware-update-for-dual-bank-stm32-microcontrollers-stmicroelectronics.pdf)
 
 ## 说明
 1. 第一层文件夹：按`MCU型号`命名，eg: stm32h743iit6, stm32g473rct6;
@@ -35,22 +36,31 @@
  */
 uint32_t endstack = 0x20000400;
 ```
-5. 在`stm32`中，在发生跳转之前，如果需要跳转的`目标地址`是可以通过设置`BOOT引脚`设置的`默认跳转地址`，则不需要调用`__set_MSP();`设置`MSP`指针；而目标地址是其他的`自定义跳转地址`时，在跳转前就必须调用`__set_MSP();`设置`MSP`指针的，并在跳转后的代码一开始就需要`重定向中断向量表`:
+5. 在`update_by_ROM`中，还有一个重要的变量，那就是`ROM`中`bootloader`的起始地址：
 ```c
-// 重定向中断向量表
+// 这个值没什么好说的，直接在官方文档'AN2606'中找到相应'MCU'的'bootloader'起始地址就好
+#define BOOTLOADER_ADDRESS					(0x1FF09800)
+``` 
+6. 在`stm32`中，在发生跳转之前，如果需要跳转的`目标地址`是可以通过设置`BOOT引脚`设置的`默认跳转地址`，则不需要调用`__set_MSP();`设置`MSP`指针；而目标地址是其他的`自定义跳转地址`时，在跳转前就必须调用`__set_MSP();`设置`MSP`指针的，并在跳转后的代码一开始就需要`重定向中断向量表`:
+```c
+// 重定向中断向量表，而下面的这个`APP_ADDRESS`，也是有要求的，这个值必须是`stm32 Flash page size`的整数倍;
+// 至于`page size`，可以在相应`MCU`的`Reference manual`文档里面找到。
 SCB->VTOR = APP_ADDRESS;
 ```
 
 ## update_by_ROM——Jump between system memory(ROM) and application(flash)
 1. 通过`ROM`中的`bootloader`进行固件升级是最简单有效的方式，但是一定要先在`AN2606`文档中确定一下，目标`MCU`的`bootloader`是否支持你使用的接口协议，比如`stm32g473`，其`ROM`中的`bootloader`就不支持通过`FDCAN`进行固件升级，如果需要使用`FDCAN`进行固件升级，就只能自己实现`bootloader`了；
 2. 关于代码中`BOOTLOADER_ADDRESS`的值(即`bootloader`起始地址)也可以通过`AN2606`文档确定，eg:
+
 ![stm32g47xx bootloader address](./img/stm32g47xx%20bootloader%20address.png)
 ![stm32h74xx bootloader address](./img/stm32h74xx%20bootloader%20address.png)
 3. 在`application`跳转到`ROM`中时，是不需要调用`__set_MSP();`设置`MSP`指针的。
 
 ## update_by_DIY——Jump between bootloader(flash) and application(flash)
 1. 关于`APP_ADDRESS`的值(即`application`的起始地址)确定，首先肯定是要给`bootloader`的固件留下足够的空间，让`bootloader`能存储得下才行；再一个就是`stm32`的`Flash`擦除是`按扇区(Sector)擦除`的，所以这个`APP_ADDRESS`还必须是扇区大小的整数倍才行，比如`stm32h743iit6`的参考手册上就有如下信息：
+
 ![RM0433.Rev8 148/3353](./img/RM0433.Rev8%20148-3353.png)
+
 所以即使`bootloader`只用了`20KB`左右的空间，`APP_ADDRESS`也必须要设置为`0x08020000(0x20000=128KB)`;
 2. 如果`bootloader`的起始地址为默认的`0x08000000`的话，在从`application`跳转到`bootloader`前，是不需要调用`__set_MSP();`设置`MSP`指针的；
 3. 而当`application`的起始地址不是一个默认起始地址时，在由`bootloader`跳转到`application`前就必须要调用`__set_MSP();`设置`MSP`指针了。
