@@ -204,7 +204,7 @@ int main(void)
 								continue;
 							}
 						}
-						for(uint8_t j = 0; j < PKG_SIZE / sizeof(uint64_t); i++) {
+						for(uint8_t j = 0; j < PKG_SIZE / sizeof(uint64_t); j++) {
 							sta |= HAL_FLASH_Program(
 												FLASH_TYPEPROGRAM_DOUBLEWORD, 
 												APP_ADDRESS + nb_pkg * PKG_SIZE + j * sizeof(uint64_t),

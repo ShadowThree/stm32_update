@@ -1,5 +1,6 @@
 *.uvguix.*
 *.txt
+*.bin
 stm32g473rct6/update_by_ROM/ROM_USART/application/MDK-ARM/application/*
 stm32g473rct6/update_by_DIY/DIY_CANFD/application/MDK-ARM/application/*
 stm32g473rct6/update_by_DIY/DIY_CANFD/bootloader/MDK-ARM/bootloader/*

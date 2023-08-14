@@ -266,7 +266,7 @@ void canSend(uint8_t isFD, uint8_t isReport, uint32_t message_id, uint8_t* data,
 	while(HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan1) == 0) {
 		// wait tx fifo free, need timeout break.
 		HAL_Delay(1);
-		if(1000 <= ++cnt) {
+		if(10 <= ++cnt) {
 			LOG_ERR("fdcan tx fifo full, send failed\n");
 			return;
 		}

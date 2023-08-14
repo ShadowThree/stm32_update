@@ -166,7 +166,7 @@ int main(void)
 				} else {
 					LOG_ERR("canfd recv NO define ID[0x%08x]\n", canRxHeader.Identifier);
 					canTxBuf[0] = STA_FID_ERR;
-					canSend(canRxHeader.Identifier == FDCAN_FD_CAN, !REPORT, canRxHeader.Identifier, canTxBuf, 1);
+					canSend(canRxHeader.FDFormat == FDCAN_FD_CAN, !REPORT, canRxHeader.Identifier, canTxBuf, 1);
 				}
 			}
 		}
