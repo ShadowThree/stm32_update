@@ -7,6 +7,9 @@
 5. 目标`MCU`的`Reference manual`，比如[RM0433: stm32h743xx Reference manual](https://www.st.com/resource/en/reference_manual/dm00314099-stm32h742-stm32h743-753-and-stm32h750-value-line-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)
 6. [On-the-fly firmware update for dual bank STM32 microcontrollers](https://www.st.com/resource/en/application_note/an4767-onthefly-firmware-update-for-dual-bank-stm32-microcontrollers-stmicroelectronics.pdf)
 
+## 注意
+1. 之前遇到过一个情况：针对同一个板子，有两套`bootloader`和`APP`，分别称为`BT1`, `APP1`, `BT2`, `APP2`吧。奇怪的是，通过`BT1`跳转到`APP1`可以成功，通过`BT2`跳转到`APP2`也可以成功，但是交叉后跳转都不成功。最后通过调试发现，原来是`BT1`, `APP1`的时钟配置跟`BT2`, `APP2`的时钟配置不一样导致！详情见[Jump to application failed with STM32F429IG](https://community.st.com/t5/stm32-mcus-products/jump-to-application-failed-with-stm32f429ig/m-p/598695#M225084)。
+
 ## 说明
 1. 第一层文件夹：按`MCU型号`命名，eg: stm32h743iit6, stm32g473rct6;
 2. 第二层文件夹：按固件`升级类型`命名, eg:
